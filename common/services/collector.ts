@@ -23,7 +23,34 @@ export class ContentCollector {
     const starsElement = document.querySelector('#repo-stars-counter-star');
     const stars = parseInt(starsElement?.getAttribute('title')?.replace(',', '') || '0', 10);
 
-    return { tags, license, stars };
+    // 从URL中获取owner和repo信息
+    const pathParts = window.location.pathname.split('/');
+    const owner = pathParts[1];
+    const repo = pathParts[2];
+    
+    // 构建README.md的raw URL
+    const readmeUrl = `https://raw.githubusercontent.com/${owner}/${repo}/main/README.md`;
+    let readme = '';
+    try {
+      const response = await fetch(readmeUrl);
+      if (response.ok) {
+        readme = await response.text();
+      } else {
+        // 如果main分支不存在，尝试master分支
+        const masterReadmeUrl = `https://raw.githubusercontent.com/${owner}/${repo}/master/README.md`;
+        const masterResponse = await fetch(masterReadmeUrl);
+        if (masterResponse.ok) {
+          readme = await masterResponse.text();
+        }
+      }
+    } catch (error) {
+      console.error('Failed to fetch README:', error);
+      // 如果获取失败，回退到DOM方式
+      const readmeElement = document.querySelector('.markdown-body');
+      readme = readmeElement?.textContent?.trim() || '';
+    }
+
+    return { tags, license, stars, readme };
   }
 
   private getImage(): string {
@@ -62,7 +89,8 @@ export class ContentCollector {
   async collect(): Promise<CollectedData> {
     const url = window.location.href;
     const title = this.isGitHubPage() ? this.getGitHubTitle() : document.title;
-    const description = this.isGitHubPage() ? document.title.split(':')[1].trim() : this.getMetaContent('description') || 
+    const titleParts = document.title.split(':');
+    const description = this.isGitHubPage() ? titleParts.slice(1, titleParts.length).join(':')?.trim() : this.getMetaContent('description') || 
                        this.getMetaContent('og:description') || 
                        document.querySelector('p')?.textContent || '';
 

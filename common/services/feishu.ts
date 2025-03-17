@@ -91,7 +91,7 @@ export class FeishuService {
     const fields: any = {
       'URL': {
         link: data.url,
-        text: data.title
+        text: data.url
       },
       '标题': data.title,
       '描述': data.description,
@@ -99,6 +99,7 @@ export class FeishuService {
         '标签': data.githubInfo.tags,
         '协议': data.githubInfo.license,
         'Star数': data.githubInfo.stars,
+        'README': data.githubInfo.readme,
       }),
     };
 
@@ -125,6 +126,7 @@ export class FeishuService {
       { name: '标签', type: '4', optional: true },
       { name: '协议', type: '3', optional: true },
       { name: 'Star数', type: '2', optional: true },
+      { name: 'README', type: '1', optional: true },
     ];
 
     const missingFields = requiredFields
