@@ -7,8 +7,7 @@ import {
 } from '@/common/utils/storage';
 import './App.css';
 
-const TOKEN_DOC_URL = 'https://open.feishu.cn/document/server-docs/api-call-guide/calling-process/get-access-token';
-const BITABLE_RECORD_API_DOC_URL = 'https://open.feishu.cn/document/uAjLw4CM/ukTMukTMukTM/reference/bitable-v1/app-table-record/search';
+const APP_MANAGEMENT_URL = 'https://open.feishu.cn/app';
 
 function App() {
   const [config, setConfig] = useState<FeishuConfig | null>(null);
@@ -72,9 +71,10 @@ function App() {
     e.preventDefault();
     const formData = new FormData(e.target as HTMLFormElement);
     const newConfig: FeishuConfig = {
-      feishuToken: formData.get('feishuToken') as string,
+      appId: formData.get('appId') as string,
+      appSecret: formData.get('appSecret') as string,
       appToken: formData.get('appToken') as string,
-      tableId: formData.get('tableId') as string,
+      tableId: formData.get('tableId') as string
     };
 
     try {
@@ -129,18 +129,29 @@ function App() {
         <form onSubmit={handleSubmit} className="space-y-6">
           <h2 className="text-2xl font-bold text-gray-900">飞书配置</h2>
           <div className="space-y-1.5">
-            <label className="block text-sm font-medium text-gray-700">获取访问凭证</label>
+            <label className="block text-sm font-medium text-gray-700">App ID</label>
             <input
               type="text"
-              name="feishuToken"
+              name="appId"
               required
-              placeholder="请输入获取访问凭证"
+              placeholder="请输入App ID"
               className="block p-2 w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 text-sm transition duration-200"
             />
             <p className="mt-1.5 text-xs text-gray-500">
-              飞书开放平台 - 
-              <a href={TOKEN_DOC_URL} target='_blank' className="text-blue-600 hover:text-blue-700 underline">获取访问凭证</a> 或者 
-              <a href={BITABLE_RECORD_API_DOC_URL} target='_blank' className="text-blue-600 hover:text-blue-700 underline">在API调试台获取</a>
+              在飞书开放平台 - <a href={APP_MANAGEMENT_URL} target='_blank' className="text-blue-600 hover:text-blue-700 underline">开发者后台</a> 中获取
+            </p>
+          </div>
+          <div className="space-y-1.5">
+            <label className="block text-sm font-medium text-gray-700">App Secret</label>
+            <input
+              type="password"
+              name="appSecret"
+              required
+              placeholder="请输入App Secret"
+              className="block p-2 w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 text-sm transition duration-200"
+            />
+            <p className="mt-1.5 text-xs text-gray-500">
+              在飞书开放平台 - <a href={APP_MANAGEMENT_URL} target='_blank' className="text-blue-600 hover:text-blue-700 underline">开发者后台</a> 中获取
             </p>
           </div>
           <div className="space-y-1.5">

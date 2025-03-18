@@ -1,4 +1,8 @@
-import { FeishuConfig, CollectedData } from '@/common/types/feishu';
+import {
+  FeishuConfig,
+  CollectedData,
+  TenantAccessTokenResponse
+} from '@/common/types/feishu';
 
 interface FieldInfo {
   field_name: string;
@@ -44,17 +48,50 @@ interface TableMetaResponse {
 
 export class FeishuService {
   private config: FeishuConfig;
+  private accessToken: string | null = null;
+  private tokenExpireTime: number = 0;
 
   constructor(config: FeishuConfig) {
     this.config = config;
   }
 
+  private async getTenantAccessToken(): Promise<string> {
+    if (this.accessToken && Date.now() < this.tokenExpireTime) {
+      return this.accessToken;
+    }
+
+    const response = await fetch('https://open.feishu.cn/open-apis/auth/v3/tenant_access_token/internal', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        app_id: this.config.appId,
+        app_secret: this.config.appSecret
+      })
+    });
+
+    if (!response.ok) {
+      throw new Error('Failed to get tenant access token');
+    }
+
+    const data = await response.json() as TenantAccessTokenResponse;
+    if (data.code !== 0) {
+      throw new Error(`Failed to get tenant access token: ${data.msg}`);
+    }
+
+    this.accessToken = data.tenant_access_token;
+    this.tokenExpireTime = Date.now() + (data.expire - 60) * 1000; // 提前60秒刷新token
+    return this.accessToken || '';
+  }
+
   private async request(path: string, method: string, data?: any) {
     const baseUrl = 'https://open.feishu.cn/open-apis/bitable/v1';
+    const token = await this.getTenantAccessToken();
     const response = await fetch(`${baseUrl}${path}`, {
       method,
       headers: {
-        'Authorization': `Bearer ${this.config.feishuToken}`,
+        'Authorization': `Bearer ${token}`,
         'Content-Type': 'application/json',
       },
       body: data ? JSON.stringify(data) : undefined,

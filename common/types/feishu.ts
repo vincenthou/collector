@@ -1,7 +1,15 @@
 export interface FeishuConfig {
-  feishuToken: string;
+  appId: string;
+  appSecret: string;
   appToken: string;
   tableId: string;
+}
+
+export interface TenantAccessTokenResponse {
+  code: number;
+  msg: string;
+  tenant_access_token: string;
+  expire: number;
 }
 
 export interface CollectedData {
