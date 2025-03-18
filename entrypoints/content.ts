@@ -3,7 +3,12 @@ import { ContentCollector } from '@/common/services/collector';
 export default defineContentScript({
   matches: ['*://*/*'],
   main() {
-    chrome.runtime.onMessage.addListener(async (message) => {
+    chrome.runtime.onMessage.addListener(async (message, sender, sendResponse) => {
+      if (message.type === 'CONFIRM_DELETE') {
+        const result = confirm(message.message);
+        sendResponse(result);
+        return true;
+      }
       if (message.type === 'COLLECT_DATA') {
         try {
           const collector = new ContentCollector();
@@ -21,12 +26,12 @@ export default defineContentScript({
           await chrome.runtime.sendMessage({
             type: 'SHOW_MESSAGE',
             isSuccess: true,
-            message: '数据采集成功'
+            message: '数据收藏成功'
           });
         } catch (err) {
           await chrome.runtime.sendMessage({
             type: 'SHOW_MESSAGE',
-            message: err instanceof Error ? err.message : '数据采集失败'
+            message: err instanceof Error ? err.message : '数据收藏失败'
           });
         }
       }

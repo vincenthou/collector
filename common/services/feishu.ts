@@ -123,6 +123,21 @@ export class FeishuService {
     }
   }
 
+  async findRecordByUrl(url: string): Promise<{ record_id: string } | null> {
+    const path = `/apps/${this.config.appToken}/tables/${this.config.tableId}/records?filter=CurrentValue.[URL].link="${encodeURIComponent(url)}"`;
+    const response = await this.request(path, 'GET');
+    
+    if (response.data?.items?.length > 0) {
+      return { record_id: response.data.items[0].record_id };
+    }
+    return null;
+  }
+
+  async deleteRecord(recordId: string): Promise<void> {
+    const path = `/apps/${this.config.appToken}/tables/${this.config.tableId}/records/${recordId}`;
+    await this.request(path, 'DELETE');
+  }
+
   async saveData(data: CollectedData): Promise<void> {
     const tableFields = await this.getTableFields();
     const fields: any = {

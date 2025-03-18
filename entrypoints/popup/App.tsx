@@ -109,7 +109,7 @@ function App() {
       if (!tab.id) return;
       await chrome.tabs.sendMessage(tab.id, { type: 'COLLECT_DATA' });
     } catch (err) {
-      setError('数据采集失败');
+      setError('数据收藏失败');
     }
   };
 
@@ -201,15 +201,15 @@ function App() {
         </form>
       ) : (
         <div className="text-center space-y-4">
-          <h2 className="text-2xl font-bold text-gray-900">内容采集</h2>
-          <p className="text-gray-600">配置已保存，点击下方按钮开始采集页面内容</p>
+          <h2 className="text-2xl font-bold text-gray-900">内容收藏</h2>
+          <p className="text-gray-600">配置已保存，点击下方按钮开始收藏页面内容</p>
           <div className="space-y-2">
             <button
               onClick={handleCollect}
               disabled={loading}
               className="w-full py-2.5 px-4 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500/50 transform transition duration-200 hover:scale-[1.02] active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              {loading ? '采集中...' : '开始采集'}
+              {loading ? '收藏中...' : '开始收藏'}
             </button>
             <button
               onClick={handleEditConfig}
