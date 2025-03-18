@@ -92,6 +92,7 @@ function App() {
       if (message.type === 'SHOW_MESSAGE') {
         const func = message.isSuccess ? setSuccess : setError;
         func(message.message);
+        setLoading(false)
       }
     };
     chrome.runtime.onMessage.addListener(messageListener);
@@ -100,10 +101,11 @@ function App() {
 
   const handleCollect = async () => {
     try {
-      const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
-      if (!tab.id) return;
+      setLoading(true);
       setError('');
       setSuccess('');
+      const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
+      if (!tab.id) return;
       await chrome.tabs.sendMessage(tab.id, { type: 'COLLECT_DATA' });
     } catch (err) {
       setError('数据采集失败');
@@ -120,10 +122,6 @@ function App() {
       setError('清除配置失败');
     }
   };
-
-  if (loading) {
-    return <div className="container">加载中...</div>;
-  }
 
   return (
     <div className="w-[400px] bg-white rounded-xl shadow-lg p-6 space-y-6">
@@ -174,8 +172,16 @@ function App() {
           <h2 className="text-2xl font-bold text-gray-900">内容采集</h2>
           <p className="text-gray-600">配置已保存，点击下方按钮开始采集页面内容</p>
           <div className="space-y-2">
-            <button onClick={handleCollect} className="w-full py-2.5 px-4 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500/50 transform transition duration-200 hover:scale-[1.02] active:scale-[0.98]">开始采集</button>
-            <button onClick={handleClearConfig} className="w-full py-2.5 px-4 bg-red-600 text-white text-sm font-medium rounded-lg hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500/50 transform transition duration-200 hover:scale-[1.02] active:scale-[0.98]">清除配置</button>
+            <button
+              onClick={handleCollect}
+              disabled={loading}
+              className="w-full py-2.5 px-4 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500/50 transform transition duration-200 hover:scale-[1.02] active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {loading ? '采集中...' : '开始采集'}
+            </button>
+            <button onClick={handleClearConfig} className="w-full py-2.5 px-4 bg-red-600 text-white text-sm font-medium rounded-lg hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500/50 transform transition duration-200 hover:scale-[1.02] active:scale-[0.98]">
+              清除配置
+            </button>
           </div>
         </div>
       )}
