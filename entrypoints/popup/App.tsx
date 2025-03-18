@@ -82,6 +82,7 @@ function App() {
       setConfig(newConfig);
       setError('');
       setSuccess('');
+      isEditing && setIsEditing(false);
     } catch (err) {
       setError('保存配置失败');
     }
@@ -112,7 +113,14 @@ function App() {
     }
   };
 
+  const [isEditing, setIsEditing] = useState(false);
+
+  const handleEditConfig = () => {
+    setIsEditing(true);
+  };
+
   const handleClearConfig = async () => {
+    if (!window.confirm('确定要清空配置吗？')) return;
     try {
       await clearFeishuConfig();
       setConfig(null);
@@ -125,7 +133,7 @@ function App() {
 
   return (
     <div className="w-[400px] bg-white rounded-xl shadow-lg p-6 space-y-6">
-      {!config ? (
+      {(!config || isEditing) ? (
         <form onSubmit={handleSubmit} className="space-y-6">
           <h2 className="text-2xl font-bold text-gray-900">飞书配置</h2>
           <div className="space-y-1.5">
@@ -134,6 +142,7 @@ function App() {
               type="text"
               name="appId"
               required
+              defaultValue={config?.appId}
               placeholder="请输入App ID"
               className="block p-2 w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 text-sm transition duration-200"
             />
@@ -147,6 +156,7 @@ function App() {
               type="password"
               name="appSecret"
               required
+              defaultValue={config?.appSecret}
               placeholder="请输入App Secret"
               className="block p-2 w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 text-sm transition duration-200"
             />
@@ -160,6 +170,7 @@ function App() {
               type="text"
               name="appToken"
               required
+              defaultValue={config?.appToken}
               placeholder="请输入表格token"
               className="block p-2 w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 text-sm transition duration-200"
             />
@@ -171,12 +182,22 @@ function App() {
               type="text"
               name="tableId"
               required
+              defaultValue={config?.tableId}
               placeholder="请输入表格 ID"
               className="block p-2 w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 text-sm transition duration-200"
             />
             <p className="mt-1.5 text-xs text-gray-500">打开多维表格，从URL中复制表格ID（table=后面形如 tbl开头的字符串）</p>
           </div>
-          <button type="submit" className="w-full py-2.5 px-4 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500/50 transform transition duration-200 hover:scale-[1.02] active:scale-[0.98]">保存配置</button>
+          <button type="submit" className="w-full py-2.5 px-4 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500/50 transform transition duration-200 hover:scale-[1.02] active:scale-[0.98]">{isEditing ? '保存修改' : '保存配置'}</button>
+          {isEditing && (
+            <button
+              type="button"
+              onClick={() => setIsEditing(false)}
+              className="w-full py-2.5 px-4 bg-gray-600 text-white text-sm font-medium rounded-lg hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-500/50 transform transition duration-200 hover:scale-[1.02] active:scale-[0.98]"
+            >
+              取消编辑
+            </button>
+          )}
         </form>
       ) : (
         <div className="text-center space-y-4">
@@ -190,7 +211,16 @@ function App() {
             >
               {loading ? '采集中...' : '开始采集'}
             </button>
-            <button onClick={handleClearConfig} className="w-full py-2.5 px-4 bg-red-600 text-white text-sm font-medium rounded-lg hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500/50 transform transition duration-200 hover:scale-[1.02] active:scale-[0.98]">
+            <button
+              onClick={handleEditConfig}
+              className="w-full py-2.5 px-4 bg-yellow-600 text-white text-sm font-medium rounded-lg hover:bg-yellow-700 focus:outline-none focus:ring-2 focus:ring-yellow-500/50 transform transition duration-200 hover:scale-[1.02] active:scale-[0.98]"
+            >
+              编辑配置
+            </button>
+            <button
+              onClick={handleClearConfig}
+              className="w-full py-2.5 px-4 bg-red-600 text-white text-sm font-medium rounded-lg hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500/50 transform transition duration-200 hover:scale-[1.02] active:scale-[0.98]"
+            >
               清除配置
             </button>
           </div>
