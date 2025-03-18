@@ -20,6 +20,7 @@ export default defineContentScript({
 
           await chrome.runtime.sendMessage({
             type: 'SHOW_MESSAGE',
+            isSuccess: true,
             message: '数据采集成功'
           });
         } catch (err) {

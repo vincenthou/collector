@@ -1,6 +1,10 @@
 import { useState, useEffect } from 'react';
 import { FeishuConfig } from '@/common/types/feishu';
-import { getFeishuConfig, saveFeishuConfig } from '@/common/utils/storage';
+import {
+  getFeishuConfig,
+  saveFeishuConfig,
+  clearFeishuConfig
+} from '@/common/utils/storage';
 import './App.css';
 
 const TOKEN_DOC_URL = 'https://open.feishu.cn/document/server-docs/api-call-guide/calling-process/get-access-token';
@@ -10,6 +14,7 @@ function App() {
   const [config, setConfig] = useState<FeishuConfig | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [success, setSuccess] = useState('');
 
   useEffect(() => {
     loadConfig();
@@ -76,6 +81,7 @@ function App() {
       await saveFeishuConfig(newConfig);
       setConfig(newConfig);
       setError('');
+      setSuccess('');
     } catch (err) {
       setError('保存配置失败');
     }
@@ -84,7 +90,8 @@ function App() {
   useEffect(() => {
     const messageListener = (message: any) => {
       if (message.type === 'SHOW_MESSAGE') {
-        setError(message.message);
+        const func = message.isSuccess ? setSuccess : setError;
+        func(message.message);
       }
     };
     chrome.runtime.onMessage.addListener(messageListener);
@@ -96,9 +103,21 @@ function App() {
       const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
       if (!tab.id) return;
       setError('');
+      setSuccess('');
       await chrome.tabs.sendMessage(tab.id, { type: 'COLLECT_DATA' });
     } catch (err) {
       setError('数据采集失败');
+    }
+  };
+
+  const handleClearConfig = async () => {
+    try {
+      await clearFeishuConfig();
+      setConfig(null);
+      setError('');
+      setSuccess('');
+    } catch (err) {
+      setError('清除配置失败');
     }
   };
 
@@ -154,10 +173,14 @@ function App() {
         <div className="text-center space-y-4">
           <h2 className="text-2xl font-bold text-gray-900">内容采集</h2>
           <p className="text-gray-600">配置已保存，点击下方按钮开始采集页面内容</p>
-          <button onClick={handleCollect} className="w-full py-2.5 px-4 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500/50 transform transition duration-200 hover:scale-[1.02] active:scale-[0.98]">开始采集</button>
+          <div className="space-y-2">
+            <button onClick={handleCollect} className="w-full py-2.5 px-4 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500/50 transform transition duration-200 hover:scale-[1.02] active:scale-[0.98]">开始采集</button>
+            <button onClick={handleClearConfig} className="w-full py-2.5 px-4 bg-red-600 text-white text-sm font-medium rounded-lg hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500/50 transform transition duration-200 hover:scale-[1.02] active:scale-[0.98]">清除配置</button>
+          </div>
         </div>
       )}
       {error && <pre className="mt-6 p-4 bg-red-50 border border-red-200 rounded-lg text-sm text-red-600">{error}</pre>}
+      {success && <pre className="mt-6 p-4 bg-green-50 border border-green-200 rounded-lg text-sm text-green-600">{success}</pre>}
     </div>
   );
 }

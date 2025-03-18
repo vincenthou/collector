@@ -15,3 +15,7 @@ export async function hasFeishuConfig(): Promise<boolean> {
   const config = await getFeishuConfig();
   return config !== null;
 }
+
+export async function clearFeishuConfig(): Promise<void> {
+  await chrome.storage.local.remove(FEISHU_CONFIG_KEY);
+}
