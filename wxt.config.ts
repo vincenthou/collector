@@ -5,6 +5,7 @@ import tailwindcss from "@tailwindcss/vite";
 export default defineConfig({
   extensionApi: 'chrome',
   manifest: {
+    name: 'Page Collector',
     permissions: ['storage']
   },
   modules: ['@wxt-dev/module-react'],
