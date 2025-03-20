@@ -1,5 +1,13 @@
 import { ContentCollector } from '@/common/services/collector';
 
+function getAllLinks() {
+  const links = Array.from(document.querySelectorAll('a'));
+  return links.map(link => ({
+    url: link.href,
+    text: link.textContent?.trim() || link.href
+  })).filter(link => link.url && link.url.startsWith('http'));
+}
+
 export default defineContentScript({
   matches: ['*://*/*'],
   main() {
@@ -7,6 +15,11 @@ export default defineContentScript({
       if (message.type === 'CONFIRM_DELETE') {
         const result = confirm(message.message);
         sendResponse(result);
+        return true;
+      }
+      if (message.type === 'GET_LINKS') {
+        const links = getAllLinks();
+        sendResponse({ links });
         return true;
       }
       if (message.type === 'COLLECT_DATA') {

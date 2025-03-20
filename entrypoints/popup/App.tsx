@@ -1,5 +1,10 @@
 import { useState, useEffect } from 'react';
 import { FeishuConfig } from '@/common/types/feishu';
+
+interface Link {
+  url: string;
+  text: string;
+}
 import {
   getFeishuConfig,
   saveFeishuConfig,
@@ -14,6 +19,7 @@ function App() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
+  const [links, setLinks] = useState<Link[]>([]);
 
   useEffect(() => {
     loadConfig();
@@ -111,6 +117,27 @@ function App() {
     } catch (err) {
       setError('数据收藏失败');
     }
+  };
+
+  const handleGetLinks = async () => {
+    try {
+      setLoading(true);
+      setError('');
+      setSuccess('');
+      setLinks([]);
+      const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
+      if (!tab.id) return;
+      const response = await chrome.tabs.sendMessage(tab.id, { type: 'GET_LINKS' });
+      setLinks(response.links);
+    } catch (err) {
+      setError('获取链接失败');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleOpenLink = (url: string) => {
+    chrome.tabs.create({ url, active: false });
   };
 
   const [isEditing, setIsEditing] = useState(false);
@@ -225,7 +252,7 @@ function App() {
             </button>
           </div>
           <p className="text-gray-600">配置已保存，点击下方按钮开始收藏页面内容</p>
-          <div className="space-y-2">
+          <div className="flex gap-2">
             <button
               onClick={handleCollect}
               disabled={loading}
@@ -233,7 +260,28 @@ function App() {
             >
               {loading ? '收藏中...' : '开始收藏'}
             </button>
+            <button
+              onClick={handleGetLinks}
+              disabled={loading}
+              className="w-full py-2.5 px-4 bg-gray-600 text-white text-sm font-medium rounded-lg hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-500/50 transform transition duration-200 hover:scale-[1.02] active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {loading ? '识别中...' : '识别链接'}
+            </button>
           </div>
+          {links.length > 0 && (
+            <div className="mt-4 max-h-60 overflow-y-auto space-y-2 border border-gray-200 rounded-lg p-4">
+              {links.map((link, index) => (
+                <div
+                  key={index}
+                  onClick={() => handleOpenLink(link.url)}
+                  className="p-2 hover:bg-gray-50 rounded cursor-pointer text-sm text-blue-600 hover:text-blue-700 truncate"
+                  title={link.text}
+                >
+                  {link.text}
+                </div>
+              ))}
+            </div>
+          )}
         </div>
       )}
       {error && <pre className="mt-6 p-4 bg-red-50 border border-red-200 rounded-lg text-sm text-red-600">{error}</pre>}
