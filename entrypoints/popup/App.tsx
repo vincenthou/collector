@@ -121,7 +121,7 @@ function App() {
       if (!tab.id) return;
       await chrome.tabs.sendMessage(tab.id, { type: 'COLLECT_DATA' });
     } catch (err) {
-      setError('数据收藏失败');
+      setError('页面收藏失败');
     }
   };
 
@@ -257,15 +257,8 @@ function App() {
               </svg>
             </button>
           </div>
-          <p className="text-gray-600">配置已保存，点击下方按钮开始收藏页面内容</p>
+          <p className="text-gray-600">配置已保存，点击下方按钮收藏页面内容</p>
           <div className="flex gap-2">
-            <button
-              onClick={handleCollect}
-              disabled={loading}
-              className="w-full py-2.5 px-4 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500/50 transform transition duration-200 hover:scale-[1.02] active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              {loading ? '收藏中...' : '开始收藏'}
-            </button>
             <button
               onClick={handleGetLinks}
               disabled={loading}
@@ -273,16 +266,31 @@ function App() {
             >
               {loading ? '识别中...' : '识别链接'}
             </button>
+            <button
+              onClick={handleCollect}
+              disabled={loading}
+              className="w-full py-2.5 px-4 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500/50 transform transition duration-200 hover:scale-[1.02] active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {loading ? '收藏中...' : '收藏页面'}
+            </button>
           </div>
           {links.length > 0 && (
             <div className="mt-4 space-y-2">
-              <input
-                type="text"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="搜索链接..."
-                className="block p-2 w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 text-sm transition duration-200"
-              />
+              <div className="flex gap-2">
+                <input
+                  type="text"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  placeholder="搜索链接..."
+                  className="flex-1 p-2 rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 text-sm transition duration-200"
+                />
+                <button
+                  onClick={() => setSearchQuery('github')}
+                  className="px-3 py-2 bg-gray-100 text-gray-700 text-sm font-medium rounded-lg hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-gray-500/50 transform transition duration-200 hover:scale-[1.02] active:scale-[0.98]"
+                >
+                  GitHub
+                </button>
+              </div>
               <div className="max-h-60 overflow-y-auto space-y-2 border border-gray-200 rounded-lg p-4">
                 {filteredLinks.map((link, index) => (
                   <div

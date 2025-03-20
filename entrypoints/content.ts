@@ -39,12 +39,12 @@ export default defineContentScript({
           await chrome.runtime.sendMessage({
             type: 'SHOW_MESSAGE',
             isSuccess: true,
-            message: '数据收藏成功'
+            message: '页面收藏成功'
           });
         } catch (err) {
           await chrome.runtime.sendMessage({
             type: 'SHOW_MESSAGE',
-            message: err instanceof Error ? err.message : '数据收藏失败'
+            message: err instanceof Error ? err.message : '页面收藏失败'
           });
         }
       }
