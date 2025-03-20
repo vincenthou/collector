@@ -20,6 +20,12 @@ function App() {
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
   const [links, setLinks] = useState<Link[]>([]);
+  const [searchQuery, setSearchQuery] = useState('');
+
+  const filteredLinks = links.filter(link => {
+    const query = searchQuery.toLowerCase();
+    return link.text.toLowerCase().includes(query) || link.url.toLowerCase().includes(query);
+  });
 
   useEffect(() => {
     loadConfig();
@@ -269,17 +275,26 @@ function App() {
             </button>
           </div>
           {links.length > 0 && (
-            <div className="mt-4 max-h-60 overflow-y-auto space-y-2 border border-gray-200 rounded-lg p-4">
-              {links.map((link, index) => (
-                <div
-                  key={index}
-                  onClick={() => handleOpenLink(link.url)}
-                  className="p-2 hover:bg-gray-50 rounded cursor-pointer text-sm text-blue-600 hover:text-blue-700 truncate"
-                  title={link.text}
-                >
-                  {link.text}
-                </div>
-              ))}
+            <div className="mt-4 space-y-2">
+              <input
+                type="text"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                placeholder="搜索链接..."
+                className="block p-2 w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 text-sm transition duration-200"
+              />
+              <div className="max-h-60 overflow-y-auto space-y-2 border border-gray-200 rounded-lg p-4">
+                {filteredLinks.map((link, index) => (
+                  <div
+                    key={index}
+                    onClick={() => handleOpenLink(link.url)}
+                    className="p-2 hover:bg-gray-50 rounded cursor-pointer text-sm text-blue-600 hover:text-blue-700 truncate"
+                    title={link.text}
+                  >
+                    {link.text}
+                  </div>
+                ))}
+              </div>
             </div>
           )}
         </div>
