@@ -16,7 +16,8 @@ const APP_MANAGEMENT_URL = 'https://open.feishu.cn/app';
 
 function App() {
   const [config, setConfig] = useState<FeishuConfig | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [collectLoading, setCollectLoading] = useState(true);
+  const [linkLoading, setLinkLoading] = useState(true);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
   const [links, setLinks] = useState<Link[]>([]);
@@ -75,7 +76,8 @@ function App() {
     } catch (err) {
       setError('加载配置失败');
     } finally {
-      setLoading(false);
+      setCollectLoading(false);
+      setLinkLoading(false);
     }
   };
 
@@ -105,7 +107,7 @@ function App() {
       if (message.type === 'SHOW_MESSAGE') {
         const func = message.isSuccess ? setSuccess : setError;
         func(message.message);
-        setLoading(false)
+        setCollectLoading(false)
       }
     };
     chrome.runtime.onMessage.addListener(messageListener);
@@ -114,7 +116,7 @@ function App() {
 
   const handleCollect = async () => {
     try {
-      setLoading(true);
+      setCollectLoading(true);
       setError('');
       setSuccess('');
       const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
@@ -127,7 +129,7 @@ function App() {
 
   const handleGetLinks = async () => {
     try {
-      setLoading(true);
+      setLinkLoading(true);
       setError('');
       setSuccess('');
       setLinks([]);
@@ -138,7 +140,7 @@ function App() {
     } catch (err) {
       setError('获取链接失败');
     } finally {
-      setLoading(false);
+      setLinkLoading(false);
     }
   };
 
@@ -236,7 +238,7 @@ function App() {
         </form>
       ) : (
         <div className="relative text-center space-y-4 pt-2">
-          <h2 className="text-2xl font-bold text-gray-900">内容收藏</h2>
+          <h2 className="text-2xl font-bold text-gray-900">网页收藏</h2>
           <div className="absolute top-0 right-0 flex space-x-2">
             <button
               onClick={handleEditConfig}
@@ -257,21 +259,20 @@ function App() {
               </svg>
             </button>
           </div>
-          <p className="text-gray-600">配置已保存，点击下方按钮收藏页面内容</p>
           <div className="flex gap-2">
             <button
               onClick={handleGetLinks}
-              disabled={loading}
-              className="w-full py-2.5 px-4 bg-gray-600 text-white text-sm font-medium rounded-lg hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-500/50 transform transition duration-200 hover:scale-[1.02] active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed"
+              disabled={linkLoading}
+              className="cursor-pointer w-full py-2.5 px-4 bg-gray-600 text-white text-sm font-medium rounded-lg hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-500/50 transform transition duration-200 hover:scale-[1.02] active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              {loading ? '识别中...' : '识别链接'}
+              {linkLoading ? '识别中...' : '识别链接'}
             </button>
             <button
               onClick={handleCollect}
-              disabled={loading}
-              className="w-full py-2.5 px-4 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500/50 transform transition duration-200 hover:scale-[1.02] active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed"
+              disabled={collectLoading}
+              className="cursor-pointer w-full py-2.5 px-4 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500/50 transform transition duration-200 hover:scale-[1.02] active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              {loading ? '收藏中...' : '收藏页面'}
+              {collectLoading ? '收藏中...' : '收藏页面'}
             </button>
           </div>
           {links.length > 0 && (
@@ -286,7 +287,7 @@ function App() {
                 />
                 <button
                   onClick={() => setSearchQuery('github')}
-                  className="px-3 py-2 bg-gray-100 text-gray-700 text-sm font-medium rounded-lg hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-gray-500/50 transform transition duration-200 hover:scale-[1.02] active:scale-[0.98]"
+                  className="cursor-pointer px-3 py-2 bg-gray-100 text-gray-700 text-sm font-medium rounded-lg hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-gray-500/50 transform transition duration-200 hover:scale-[1.02] active:scale-[0.98]"
                 >
                   GitHub
                 </button>
