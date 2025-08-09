@@ -107,6 +107,9 @@ function App() {
       if (message.type === 'SHOW_MESSAGE') {
         const func = message.isSuccess ? setSuccess : setError;
         func(message.message);
+        if (message.shareURL) {
+          setLinks([{ url: message.shareURL, text: '查看记录' }]);
+        }
         setCollectLoading(false)
       }
     };

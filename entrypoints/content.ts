@@ -39,6 +39,7 @@ export default defineContentScript({
           await chrome.runtime.sendMessage({
             type: 'SHOW_MESSAGE',
             isSuccess: true,
+            shareURL: response.shareURL,
             message: '页面收藏成功'
           });
         } catch (err) {

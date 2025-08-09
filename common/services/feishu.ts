@@ -46,6 +46,12 @@ interface TableMetaResponse {
   };
 }
 
+interface RecordItem {
+  record_id: string;
+  fields: Record<string, any>;
+  shared_url?: string;
+}
+
 export class FeishuService {
   private config: FeishuConfig;
   private accessToken: string | null = null;
@@ -133,12 +139,21 @@ export class FeishuService {
     return null;
   }
 
+  async batchGetRecords(recordIds: string[]): Promise<RecordItem[]> {
+    const path = `/apps/${this.config.appToken}/tables/${this.config.tableId}/records/batch_get`;
+    const response = await this.request(path, 'POST', {
+      record_ids: recordIds,
+      with_shared_url: true,
+     });
+    return response?.data?.records || [];
+  }
+
   async deleteRecord(recordId: string): Promise<void> {
     const path = `/apps/${this.config.appToken}/tables/${this.config.tableId}/records/${recordId}`;
     await this.request(path, 'DELETE');
   }
 
-  async saveData(data: CollectedData): Promise<void> {
+  async saveData(data: CollectedData): Promise<{ data: { record: { record_id: string }}}> {
     const tableFields = await this.getTableFields();
     const fields: any = {
       'URL': {
@@ -211,6 +226,6 @@ export class FeishuService {
     }
 
     const path = `/apps/${this.config.appToken}/tables/${this.config.tableId}/records`;
-    await this.request(path, 'POST', { fields });
+    return await this.request(path, 'POST', { fields });
   }
 }

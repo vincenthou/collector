@@ -32,8 +32,15 @@ export default defineBackground(() => {
             await feishuService.deleteRecord(existingRecord.record_id);
           }
 
-          await feishuService.saveData(message.data);
-          sendResponse({ success: true });
+          const res = await feishuService.saveData(message.data);
+          let shareURL = '';
+          if (res?.data?.record) {
+            const records = await feishuService.batchGetRecords([res.data.record.record_id]);
+            if (records.length > 0) {
+              shareURL = records[0].shared_url || '';
+            }
+          }
+          sendResponse({ shareURL, success: true });
         } catch (err) {
           sendResponse({ 
             success: false, 
